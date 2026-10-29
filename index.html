@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0b0714">
+<title>🎂 Ekta Surprise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
+<style>
+:root{
+  --bg:#0b0714;--pink:#ff4ecd;--violet:#a78bfa;--lime:#c6ff3d;--sun:#ffd166;--sky:#4cc9f0;
+  --glass:rgba(255,255,255,.09);--glass-b:rgba(255,255,255,.16);
+  --fd:'Syne',system-ui,sans-serif;--fb:'Space Grotesk',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:#fff;font-family:var(--fb);overflow:hidden;overscroll-behavior:none;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+button,input{font-family:inherit;color:inherit}
+#app{position:fixed;inset:0;height:100dvh;max-width:520px;margin:0 auto;overflow:hidden;background:var(--bg)}
+.step{position:absolute;inset:0;opacity:0;pointer-events:none;transform:scale(1.04);transition:opacity .55s ease,transform .55s ease}
+.step.active{opacity:1;pointer-events:auto;transform:none}
+
+/* ---------- desktop gate ---------- */
+.gate{display:none;position:fixed;inset:0;z-index:999;background:var(--bg);align-items:center;justify-content:center;text-align:center;padding:24px;flex-direction:column;gap:18px}
+body.desktop .gate{display:flex}body.desktop #app{display:none}
+.gate h1{font-family:var(--fd);font-size:40px}
+.gate img{width:180px;height:180px;border-radius:20px;background:#fff;padding:10px}
+.gate p{opacity:.7}
+
+/* ---------- blobs bg ---------- */
+.mesh{position:absolute;inset:0;overflow:hidden;z-index:0}
+.mesh i{position:absolute;width:70vmax;height:70vmax;border-radius:50%;filter:blur(70px);opacity:.55;animation:drift 14s ease-in-out infinite alternate}
+.mesh i:nth-child(1){background:var(--pink);top:-20%;left:-30%}
+.mesh i:nth-child(2){background:var(--violet);bottom:-25%;right:-35%;animation-delay:-5s}
+.mesh i:nth-child(3){background:var(--sky);width:40vmax;height:40vmax;top:40%;left:30%;opacity:.3;animation-delay:-9s}
+@keyframes drift{to{transform:translate(8vmax,6vmax) scale(1.15)}}
+
+/* ---------- lock ---------- */
+#lock{display:flex;flex-direction:column;align-items:center;padding:calc(env(safe-area-inset-top) + 56px) 24px calc(env(safe-area-inset-bottom) + 28px)}
+#lock .time{font-family:var(--fb);font-weight:500;font-size:84px;line-height:1;letter-spacing:-3px;position:relative;z-index:1;margin-top:10px}
+#lock .date{font-size:18px;opacity:.85;position:relative;z-index:1;margin-top:6px}
+.notif{position:relative;z-index:1;width:100%;margin-top:40px;background:var(--glass);border:1px solid var(--glass-b);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  border-radius:22px;padding:14px 16px;display:flex;gap:12px;align-items:center;transform:translateY(-140%) scale(.9);opacity:0;transition:transform .7s cubic-bezier(.2,1.4,.4,1),opacity .4s}
+.notif.in{transform:none;opacity:1}
+.notif .ic{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,#34d399,#16a34a);display:grid;place-items:center;font-size:22px;flex:none}
+.notif b{display:block;font-size:15px}.notif span{font-size:14px;opacity:.85}
+.notif small{margin-left:auto;opacity:.6;font-size:12px;align-self:flex-start}
+.unlock{position:relative;z-index:1;margin-top:auto;width:100%}
+.track{position:relative;height:64px;border-radius:40px;background:var(--glass);border:1px solid var(--glass-b);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);overflow:hidden;touch-action:none}
+.track .lbl{position:absolute;inset:0;display:grid;place-items:center;font-weight:500;letter-spacing:.5px;
+  background:linear-gradient(90deg,rgba(255,255,255,.35) 0%,#fff 50%,rgba(255,255,255,.35) 100%);background-size:200% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 2.2s linear infinite;padding-left:40px}
+@keyframes shine{to{background-position:-200% 0}}
+.handle{position:absolute;left:6px;top:6px;width:52px;height:52px;border-radius:50%;background:#fff;color:#111;display:grid;place-items:center;font-size:22px;touch-action:none;cursor:grab}
+
+/* ---------- chat ---------- */
+#chat,#verify{display:flex;flex-direction:column}
+.chead{position:relative;z-index:2;display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top) + 14px) 18px 14px;border-bottom:1px solid var(--glass-b);background:rgba(11,7,20,.5);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--violet));display:grid;place-items:center;font-weight:700;font-family:var(--fd);flex:none}
+.chead b{display:block}.chead small{opacity:.6;font-size:12px}
+.msgs{position:relative;z-index:1;flex:1;overflow-y:auto;padding:18px 16px;display:flex;flex-direction:column;gap:10px}
+.b{max-width:80%;padding:11px 15px;border-radius:20px;font-size:16px;line-height:1.35;animation:pop .35s cubic-bezier(.2,1.5,.4,1) both}
+.b.bot{background:var(--glass);border:1px solid var(--glass-b);align-self:flex-start;border-bottom-left-radius:6px}
+.b.me{background:linear-gradient(135deg,var(--pink),var(--violet));align-self:flex-end;border-bottom-right-radius:6px}
+.typing{display:flex;gap:5px;align-items:center;padding:14px 16px}
+.typing i{width:8px;height:8px;border-radius:50%;background:#fff;opacity:.5;animation:blink 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes blink{50%{transform:translateY(-5px);opacity:1}}
+@keyframes pop{from{transform:scale(.7) translateY(10px);opacity:0}}
+.composer{position:relative;z-index:2;display:flex;gap:10px;padding:12px 14px calc(env(safe-area-inset-bottom) + 14px);transition:opacity .3s,transform .3s}
+.composer.off{opacity:0;pointer-events:none;transform:translateY(20px)}
+.composer input,.field{flex:1;background:var(--glass);border:1px solid var(--glass-b);border-radius:30px;padding:14px 18px;font-size:16px;outline:none;-webkit-user-select:text;user-select:text}
+.composer input:focus,.field:focus{border-color:var(--pink)}
+.send{width:50px;height:50px;border-radius:50%;border:0;background:var(--lime);color:#111;font-size:20px;font-weight:700;flex:none}
+.btn{border:0;border-radius:30px;padding:15px 26px;font-weight:700;font-size:16px;background:var(--lime);color:#111}
+.btn.ghost{background:var(--glass);color:#fff;border:1px solid var(--glass-b)}
+.btn:active,.send:active{transform:scale(.95)}
+
+/* ---------- verify ---------- */
+.vwrap{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:18px}
+.vwrap h2{font-family:var(--fd);font-size:30px;line-height:1.05}
+.vwrap p{opacity:.8;max-width:300px}
+.vpanel{display:none;flex-direction:column;align-items:center;gap:18px;width:100%}.vpanel.on{display:flex;animation:pop .45s both}
+.finger{position:relative;width:150px;height:150px;border-radius:50%;display:grid;place-items:center;font-size:64px;background:var(--glass);border:1px solid var(--glass-b);touch-action:none}
+.finger svg{position:absolute;inset:-6px;width:162px;height:162px;transform:rotate(-90deg)}
+.finger circle{fill:none;stroke-width:5;stroke-linecap:round}
+.finger .bg{stroke:rgba(255,255,255,.12)}.finger .fg{stroke:var(--lime);stroke-dasharray:490;stroke-dashoffset:490}
+.finger.ok{background:rgba(198,255,61,.18)}
+.finger.scan::after{content:"";position:absolute;left:14px;right:14px;height:3px;background:var(--lime);box-shadow:0 0 14px var(--lime);animation:scanl 1s ease-in-out infinite alternate}
+@keyframes scanl{from{top:22px}to{top:120px}}
+.vstatus{font-weight:700;min-height:26px;color:var(--lime)}
+
+/* ---------- stories ---------- */
+#stories{background:#0b0714}
+.sbar{position:absolute;z-index:20;top:calc(env(safe-area-inset-top) + 10px);left:12px;right:12px;display:flex;gap:4px;pointer-events:none}
+.sbar i{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.28);overflow:hidden}
+.sbar b{display:block;height:100%;background:#fff;transform:scaleX(0);transform-origin:left}
+.shead{position:absolute;z-index:20;top:calc(env(safe-area-inset-top) + 22px);left:14px;right:14px;display:flex;align-items:center;gap:10px;pointer-events:none}
+.shead .av{width:34px;height:34px;font-size:14px}
+.shead span{font-weight:700;font-size:14px}.shead small{opacity:.6;margin-left:4px}
+.mute{margin-left:auto;pointer-events:auto;width:36px;height:36px;border-radius:50%;border:0;background:var(--glass);backdrop-filter:blur(8px);font-size:16px;display:none}
+#zones{position:absolute;inset:0;z-index:2}
+#slides{position:absolute;inset:0;z-index:5;pointer-events:none}
+.slide{position:absolute;inset:0;pointer-events:none;overflow:hidden;padding:calc(env(safe-area-inset-top) + 70px) 20px calc(env(safe-area-inset-bottom) + 70px);display:flex;flex-direction:column;align-items:center;justify-content:center;animation:sin .5s ease both}
+@keyframes sin{from{opacity:0;transform:scale(1.06)}}
+.ix{pointer-events:auto}
+.nextpill{position:absolute;z-index:20;bottom:calc(env(safe-area-inset-bottom) + 18px);left:50%;transform:translateX(-50%);background:var(--glass);border:1px solid var(--glass-b);backdrop-filter:blur(10px);
+  border-radius:30px;padding:10px 20px;font-size:14px;font-weight:700;display:none;animation:nudge 1.6s ease-in-out infinite}
+.nextpill.on{display:block}
+@keyframes nudge{50%{transform:translateX(-50%) translateX(6px)}}
+body.paused .sbar{opacity:.4}
+
+/* hero */
+.hero{text-align:center}
+.kin{display:flex;flex-direction:column;align-items:center;font-family:var(--fd);font-weight:800;line-height:.95;position:relative;z-index:2}
+.kin .ln{display:flex;justify-content:center;font-size:clamp(46px,16vw,78px);letter-spacing:-1px}
+.kin .ln.nm{font-size:clamp(40px,14vw,70px);margin-top:10px}
+.kin .l{display:inline-block;opacity:0;transform:translateY(60px) rotate(12deg) scale(.5);animation:letter .7s cubic-bezier(.2,1.6,.4,1) forwards,bob 2.6s ease-in-out infinite;
+  background:linear-gradient(180deg,#fff,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(255,78,205,.55))}
+.kin .nm .l{background:linear-gradient(180deg,var(--lime),var(--sky));-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 18px rgba(198,255,61,.5))}
+@keyframes letter{to{opacity:1;transform:none}}
+@keyframes bob{50%{translate:0 -7px}}
+.hero .sub{margin-top:26px;font-size:18px;opacity:0;animation:fadeup .8s 2.2s forwards;max-width:300px;position:relative;z-index:2}
+@keyframes fadeup{from{transform:translateY(14px)}to{opacity:.9;transform:none}}
+.balloons{position:absolute;inset:0;z-index:1;overflow:hidden}
+.bl{position:absolute;bottom:-120px;width:54px;height:68px;border-radius:50% 50% 48% 48%;animation:rise linear infinite;opacity:.9}
+.bl::after{content:"";position:absolute;left:50%;top:100%;width:1.5px;height:50px;background:rgba(255,255,255,.4)}
+@keyframes rise{to{transform:translateY(-120vh) rotate(14deg)}}
+.emoji-rain{position:absolute;inset:0;z-index:1;pointer-events:none}
+.emoji-rain span{position:absolute;top:-40px;font-size:24px;animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(115vh) rotate(360deg)}}
+
+/* candle */
+.candle{text-align:center;gap:14px}
+.candle h3,.sec-h{font-family:var(--fd);font-size:30px;line-height:1.05}
+.cakewrap{width:min(78vw,300px);touch-action:none;position:relative}
+.cakewrap svg{width:100%;height:auto;overflow:visible}
+.flame{transform-origin:50% 100%;transform-box:fill-box;animation:flick .25s ease-in-out infinite alternate}
+@keyframes flick{from{transform:scale(1,1) rotate(-3deg)}to{transform:scale(.88,1.1) rotate(3deg)}}
+.blown .flame{animation:none;transform:scale(0);opacity:0;transition:.4s}
+.smoke{opacity:0}.blown .smoke{animation:smoke 2s ease-out forwards}
+@keyframes smoke{from{opacity:.8;transform:translateY(0)}to{opacity:0;transform:translateY(-50px)}}
+.meter{width:min(70vw,260px);height:8px;border-radius:8px;background:var(--glass);overflow:hidden;margin:0 auto}
+.meter b{display:block;height:100%;background:linear-gradient(90deg,var(--sky),var(--lime));transform:scaleX(0);transform-origin:left}
+.candle .hint{font-size:16px;opacity:.85;min-height:24px}
+
+/* swipe */
+.swipe{gap:14px;text-align:center}
+.stack{position:relative;width:min(80vw,330px);height:min(62dvh,470px);touch-action:none}
+.card{position:absolute;inset:0;border-radius:26px;overflow:hidden;background:#222 center/cover;box-shadow:0 18px 40px rgba(0,0,0,.5);transition:transform .35s cubic-bezier(.2,1,.3,1),opacity .3s;will-change:transform}
+.card img{width:100%;height:100%;object-fit:cover;pointer-events:none;display:block}
+.card .cap{position:absolute;left:0;right:0;bottom:0;padding:60px 18px 18px;text-align:left;font-weight:700;font-size:20px;background:linear-gradient(transparent,rgba(0,0,0,.8))}
+.stamp{position:absolute;top:22px;left:20px;border:4px solid var(--lime);color:var(--lime);padding:2px 12px;border-radius:10px;font-family:var(--fd);font-size:30px;transform:rotate(-14deg);opacity:0}
+.toast{position:absolute;left:50%;top:14%;transform:translateX(-50%) translateY(-10px);background:#fff;color:#111;padding:10px 16px;border-radius:30px;font-weight:700;font-size:14px;opacity:0;transition:.3s;z-index:30;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.match{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:3;text-align:center}
+.match.on{display:flex;animation:pop .5s both}
+.match h2{font-family:var(--fd);font-size:44px;background:linear-gradient(90deg,var(--pink),var(--lime));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* polaroid */
+.board{position:relative;width:100%;height:min(66dvh,520px);touch-action:none}
+.pol{position:absolute;width:48%;background:#fffdf7;padding:8px 8px 30px;border-radius:4px;box-shadow:0 12px 26px rgba(0,0,0,.5);touch-action:none;color:#222;cursor:grab}
+.pol img{width:100%;aspect-ratio:1;object-fit:cover;display:block;pointer-events:none;background:#ddd}
+.pol span{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:13px;font-weight:700}
+.pol::before{content:"";position:absolute;top:-10px;left:50%;width:60px;height:20px;background:rgba(255,220,120,.7);transform:translateX(-50%) rotate(-3deg)}
+
+/* reel */
+.reelwrap{width:calc(100% + 40px);margin:0 -20px}
+.reel{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;padding:20px 14%;scrollbar-width:none;perspective:900px;-webkit-overflow-scrolling:touch}
+.reel::-webkit-scrollbar{display:none}
+.rc{flex:none;width:72%;aspect-ratio:3/4.3;scroll-snap-align:center;border-radius:24px;overflow:hidden;position:relative;background:#222;box-shadow:0 20px 40px rgba(0,0,0,.5);transition:transform .08s linear}
+.rc img{position:absolute;inset:-6%;width:112%;height:112%;object-fit:cover;display:block}
+.rc span{position:absolute;left:0;right:0;bottom:0;padding:50px 16px 16px;font-weight:700;font-size:18px;background:linear-gradient(transparent,rgba(0,0,0,.75))}
+
+/* wrapped */
+.wrapped{align-items:stretch;justify-content:center;gap:12px}
+.wrapped h3{font-family:var(--fd);font-size:34px;line-height:1;margin-bottom:6px}
+.stat{border-radius:22px;padding:16px 18px;opacity:0;transform:translateY(30px) scale(.95);animation:statin .6s cubic-bezier(.2,1.4,.4,1) forwards;color:#111}
+.stat small{display:block;font-size:13px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:.6px}
+.stat b{display:block;font-family:var(--fd);font-size:34px;line-height:1.05;margin-top:2px}
+.stat:nth-child(2){background:var(--lime)}.stat:nth-child(3){background:var(--pink)}.stat:nth-child(4){background:var(--sun)}.stat:nth-child(5){background:var(--sky)}.stat:nth-child(6){background:var(--violet)}
+@keyframes statin{to{opacity:1;transform:none}}
+
+/* final */
+.final{text-align:center;gap:16px}
+.fcard{width:100%;background:var(--glass);border:1px solid var(--glass-b);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:28px;padding:26px 22px}
+.fcard h2{font-family:var(--fd);font-size:30px;margin-bottom:14px}
+.fcard p{font-size:18px;line-height:1.5;min-height:150px;text-align:left;white-space:pre-line}
+.fcard .caret::after{content:"▍";animation:blink2 .8s steps(1) infinite;color:var(--lime)}
+@keyframes blink2{50%{opacity:0}}
+.fbtns{display:flex;gap:10px;justify-content:center;margin-top:16px;opacity:0;transition:opacity .6s}.fbtns.on{opacity:1}
+.sign{margin-top:12px;opacity:.7;font-size:14px}
+
+@media (prefers-reduced-motion:reduce){
+  .mesh i,.bl,.emoji-rain span,.kin .l,.nextpill,.flame{animation-duration:.01s!important;animation-iteration-count:1!important}
+}
+</style>
+</head>
+<body>
+
+<div class="gate">
+  <h1>Phone e khol 📱</h1>
+  <p>Ei surprise sudhu mobile er jonno.</p>
+  <img id="qr" alt="QR">
+  <p style="font-size:13px">Phone camera diye scan koro</p>
+</div>
+
+<div id="app">
+
+  <!-- 1. LOCK -->
+  <section class="step active" id="lock">
+    <div class="mesh"><i></i><i></i><i></i></div>
+    <div class="time" id="clock">9:41</div>
+    <div class="date" id="cdate"></div>
+    <div class="notif" id="notif">
+      <div class="ic">💬</div>
+      <div><b id="nTitle"></b><span id="nText"></span></div>
+      <small>now</small>
+    </div>
+    <div class="unlock">
+      <div class="track" id="track">
+        <div class="lbl">slide to open 🎁</div>
+        <div class="handle" id="handle">➜</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. CHAT -->
+  <section class="step" id="chat">
+    <div class="mesh"><i></i><i></i><i></i></div>
+    <div class="chead"><div class="av" id="chAv"></div><div><b id="chName"></b><small>online</small></div></div>
+    <div class="msgs" id="msgs"></div>
+    <form class="composer off" id="nameForm" autocomplete="off">
+      <input id="nameIn" type="text" placeholder="Tomar naam..." maxlength="24" enterkeyhint="send">
+      <button class="send" type="submit">↑</button>
+    </form>
+  </section>
+
+  <!-- 3. VERIFY -->
+  <section class="step" id="verify">
+    <div class="mesh"><i></i><i></i><i></i></div>
+    <div class="vwrap">
+      <div class="vpanel on" id="vq">
+        <h2>🔐 Main Character<br>Verification</h2>
+        <p id="vqText"></p>
+        <form id="secretForm" style="width:100%;display:flex;flex-direction:column;gap:12px;align-items:center" autocomplete="off">
+          <input class="field" id="secretIn" style="width:100%;flex:none;text-align:center" maxlength="40" enterkeyhint="done">
+          <button class="btn" type="submit">Continue →</button>
+        </form>
+      </div>
+      <div class="vpanel" id="vf">
+        <h2>Last step ✨</h2>
+        <p>Fingerprint ta dhore rakho, scan complete na howa porjonto.</p>
+        <div class="finger ix" id="finger">
+          <svg viewBox="0 0 162 162"><circle class="bg" cx="81" cy="81" r="78"/><circle class="fg" id="fRing" cx="81" cy="81" r="78"/></svg>
+          <span>👆</span>
+        </div>
+        <div class="vstatus" id="vstatus">hold to scan</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. STORIES -->
+  <section class="step" id="stories">
+    <div class="mesh"><i></i><i></i><i></i></div>
+    <div class="sbar" id="sbar"></div>
+    <div class="shead"><div class="av" id="sAv"></div><span id="sName"></span><small>• just now</small><button class="mute" id="mute">🔊</button></div>
+    <div id="zones"></div>
+    <div id="slides"></div>
+    <button class="nextpill" id="nextpill">Next ›</button>
+  </section>
+</div>
+
+<script>
+/* =====================================================================
+   CONFIG — shob content ekhane. Code touch korar dorkar nai.
+   ===================================================================== */
+const CONFIG = {
+  fromName: "Shrabon",              // tumi (sender)
+  defaultName: "Bondhu",            // naam na dile fallback
+  notification: { title: "Shrabon", text: "Ekta surprise tomar jonno wait korche... 👀" },
+  askName: "Hey! 👋 Tumi ke bolo to?",
+  greet: (n) => [`Hey ${n}! 😍`, "Ekta special jinis ready kore rekhechi...", "Tar age ekta choto verification lagbe 🔐"],
+  secret: { question: "Tomar sobcheye favourite khabar ki? 🍕", placeholder: "Ekhane lekho..." },
+  heroSub: "Aj tomar din. Tomar moto manush ke celebrate korte pere ami lucky 🫶",
+  candleTitle: "Ekta wish koro...",
+  swipeTitle: "Memory lane 💘",
+  polTitle: "Scrapbook 📸",
+  reelTitle: "Tomar best looks ✨",
+  wrappedTitle: "Tomar Year Wrapped 🎧",
+  // count = number count-up korbe, suffix er sathe. text = simple string value.
+  wrapped: [
+    { label: "Friendship level", count: 100, suffix: "%" },
+    { label: "Times you made me laugh", text: "∞" },
+    { label: "Top memory", text: "Tomar sathe sei raat 🌙" },   // <-- apnar memory diye replace koro
+  ],
+  finalTitle: "Last ekta kotha 💌",
+  finalMessage: "{name}, tumi amar life e ekta alada jaygay acho.\nProti ta din e tomar hashi, tomar pagolami, tomar sathe thaka, shob kichu ke ami value kori.\n\nEi bochor ta tomar jonno shob shundor kichu niye ashuk. Happy Birthday! 🎂❤️",
+  // Gaan: music file path dao (e.g. "music.mp3"). Faka rakhle music off thakbe.
+  music: "",
+  // Nijer photo: photos/ folder e rakho, tarpor path dao (e.g. "photos/photo1.jpeg")
+  photos: [
+    { src: "photos/photo1.jpeg", cap: "Sei din ta 😭" },
+    { src: "photos/photo2.jpeg", cap: "Main character energy" },
+    { src: "photos/photo3.jpeg", cap: "No filter needed" },
+    { src: "photos/photo4.jpeg", cap: "Pure vibes ✨" },
+    { src: "photos/photo5.jpeg", cap: "Iconic, honestly" },
+  ],
+};
+
+/* ===================================================================== */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const vibrate = (p) => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const state = { name: CONFIG.defaultName, secret: "" };
+const COLORS = ["#ff4ecd", "#a78bfa", "#c6ff3d", "#ffd166", "#4cc9f0"];
+
+function show(id) { $$(".step").forEach((s) => s.classList.toggle("active", s.id === id)); }
+
+/* ---------- confetti helpers ---------- */
+const fire = (o) => { if (window.confetti) confetti(Object.assign({ disableForReducedMotion: true, zIndex: 200, colors: COLORS }, o)); };
+const burst = () => fire({ particleCount: 140, spread: 95, origin: { y: 0.6 } });
+const sides = () => {
+  fire({ particleCount: 36, angle: 60, spread: 65, origin: { x: 0, y: 0.75 } });
+  fire({ particleCount: 36, angle: 120, spread: 65, origin: { x: 1, y: 0.75 } });
+};
+function bigBlast() {
+  burst(); vibrate([40, 40, 80, 40, 120]);
+  let n = 0; const t = setInterval(() => { sides(); fire({ particleCount: 60, spread: 360, startVelocity: 25, origin: { x: Math.random(), y: Math.random() * 0.5 } }); if (++n > 7) clearInterval(t); }, 260);
+  try {
+    if (window.confetti && confetti.shapeFromText) {
+      const gift = confetti.shapeFromText({ text: "🎁", scalar: 3 }), heart = confetti.shapeFromText({ text: "💖", scalar: 3 });
+      fire({ shapes: [gift, heart], scalar: 3, particleCount: 40, spread: 120, origin: { y: 0.7 }, colors: undefined });
+    }
+  } catch (e) {}
+}
+
+/* =====================================================================
+   BOOT / DESKTOP GATE
+   ===================================================================== */
+const isMobile = () => innerWidth <= 560 || (matchMedia("(pointer:coarse)").matches && innerWidth <= 900);
+if (!isMobile() && location.hash !== "#preview") {
+  document.body.classList.add("desktop");
+  $("#qr").src = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(location.href.split("#")[0]);
+} else { bootLock(); }
+
+/* =====================================================================
+   STEP 1: LOCK
+   ===================================================================== */
+function bootLock() {
+  const tick = () => {
+    const d = new Date();
+    $("#clock").textContent = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: false });
+    $("#cdate").textContent = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+  };
+  tick(); setInterval(tick, 1000);
+  $("#nTitle").textContent = CONFIG.notification.title;
+  $("#nText").textContent = CONFIG.notification.text;
+  setTimeout(() => { $("#notif").classList.add("in"); vibrate([60, 60, 60]); }, 1300);
+
+  const track = $("#track"), handle = $("#handle");
+  let dragging = false, sx = 0, x = 0;
+  const max = () => track.clientWidth - handle.clientWidth - 12;
+  handle.addEventListener("pointerdown", (e) => { dragging = true; sx = e.clientX - x; handle.setPointerCapture(e.pointerId); handle.style.transition = "none"; });
+  handle.addEventListener("pointermove", (e) => {
+    if (!dragging) return; x = clamp(e.clientX - sx, 0, max());
+    handle.style.transform = `translateX(${x}px)`; $(".lbl", track).style.opacity = 1 - x / (max() * 0.6);
+  });
+  const end = () => {
+    if (!dragging) return; dragging = false;
+    if (x > max() * 0.8) { vibrate(30); startMusic(); startChat(); }
+    else { x = 0; handle.style.transition = "transform .35s cubic-bezier(.2,1.5,.4,1)"; handle.style.transform = ""; $(".lbl", track).style.opacity = 1; }
+  };
+  handle.addEventListener("pointerup", end); handle.addEventListener("pointercancel", end);
+}
+
+/* ---------- music ---------- */
+let audio = null, muted = false;
+function startMusic() {
+  if (!CONFIG.music || audio) return;
+  audio = new Audio(CONFIG.music); audio.loop = true; audio.volume = 0.7;
+  audio.play().catch(() => {});
+  const m = $("#mute"); m.style.display = "block";
+  m.onclick = () => { muted = !muted; audio.muted = muted; m.textContent = muted ? "🔇" : "🔊"; };
+}
+
+/* =====================================================================
+   STEP 2: CHAT (name input)
+   ===================================================================== */
+const msgs = $("#msgs");
+function addBubble(text, who) {
+  const d = document.createElement("div"); d.className = "b " + who; d.textContent = text; msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight; return d;
+}
+async function botSay(text, delay = 1000) {
+  const t = document.createElement("div"); t.className = "b bot typing"; t.innerHTML = "<i></i><i></i><i></i>";
+  msgs.appendChild(t); msgs.scrollTop = msgs.scrollHeight;
+  await sleep(delay); t.remove(); addBubble(text, "bot");
+}
+async function startChat() {
+  $("#chName").textContent = CONFIG.fromName; $("#chAv").textContent = CONFIG.fromName[0];
+  show("chat"); preloadPhotos();
+  await sleep(500);
+  await botSay(CONFIG.askName, 1100);
+  $("#nameForm").classList.remove("off"); setTimeout(() => $("#nameIn").focus(), 300);
+}
+$("#nameForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const v = $("#nameIn").value.trim(); if (!v) return;
+  state.name = v.charAt(0).toUpperCase() + v.slice(1);
+  $("#nameIn").blur(); $("#nameForm").classList.add("off");
+  addBubble(state.name, "me"); vibrate(15);
+  for (const line of CONFIG.greet(state.name)) await botSay(line, 900);
+  await sleep(600); startVerify();
+});
+
+/* =====================================================================
+   STEP 3: VERIFY (secret question + fingerprint)
+   ===================================================================== */
+function startVerify() {
+  $("#vqText").textContent = CONFIG.secret.question;
+  $("#secretIn").placeholder = CONFIG.secret.placeholder;
+  show("verify");
+}
+$("#secretForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const v = $("#secretIn").value.trim(); if (!v) { vibrate(80); $("#secretIn").focus(); return; }
+  state.secret = v; $("#secretIn").blur(); vibrate(15);
+  $("#vq").classList.remove("on"); $("#vf").classList.add("on");
+});
+(function fingerprint() {
+  const f = $("#finger"), ring = $("#fRing"), st = $("#vstatus"), NEED = 1900, LEN = 490;
+  let raf = 0, t0 = 0, done = false;
+  const loop = (now) => {
+    const p = clamp((now - t0) / NEED, 0, 1);
+    ring.style.strokeDashoffset = LEN * (1 - p);
+    st.textContent = "scanning... " + Math.round(p * 100) + "%";
+    if (p >= 1) return finish();
+    if (Math.round(p * 100) % 25 === 0) vibrate(8);
+    raf = requestAnimationFrame(loop);
+  };
+  const start = (e) => { if (done) return; t0 = performance.now(); f.classList.add("scan"); raf = requestAnimationFrame(loop); f.setPointerCapture && f.setPointerCapture(e.pointerId); };
+  const cancel = () => { if (done) return; cancelAnimationFrame(raf); f.classList.remove("scan"); ring.style.strokeDashoffset = LEN; st.textContent = "hold to scan"; };
+  async function finish() {
+    done = true; f.classList.remove("scan"); f.classList.add("ok"); vibrate([30, 40, 90]);
+    st.textContent = "Identity confirmed ✅ VIP unlocked"; burst();
+    await sleep(1500); startStories();
+  }
+  f.addEventListener("pointerdown", start);
+  ["pointerup", "pointercancel"].forEach((ev) => f.addEventListener(ev, cancel));
+})();
+
+/* =====================================================================
+   STEP 4: STORIES
+   ===================================================================== */
+function preloadPhotos() { CONFIG.photos.forEach((p) => { const i = new Image(); i.src = p.src; }); }
+const imgTag = (p, cls = "") => `<img class="${cls}" src="${esc(p.src)}" alt="" draggable="false" onerror="this.style.display='none'">`;
+
+function letters(text, start) {
+  return [...text].map((c, i) => `<span class="l" style="animation-delay:${start + i * 0.06}s,${(i * 0.17).toFixed(2)}s">${c === " " ? "&nbsp;" : esc(c)}</span>`).join("");
+}
+function typewrite(el, text, speed, onDone) {
+  let i = 0; el.classList.add("caret");
+  const t = setInterval(() => {
+    el.textContent = text.slice(0, ++i);
+    if (i % 3 === 0) vibrate(4);
+    if (i >= text.length) { clearInterval(t); el.classList.remove("caret"); onDone && onDone(); }
+  }, speed);
+  return t;
+}
+
+/* each slide: dur (ms, 0 = manual), html(), enter(el) -> optional cleanup fn */
+const SLIDES = [
+  /* 1 HERO */
+  {
+    dur: 7500,
+    html: () => {
+      const bl = Array.from({ length: 9 }, (_, i) => `<div class="bl" style="left:${(i * 11 + Math.random() * 6) | 0}%;background:${COLORS[i % 5]};animation-duration:${7 + Math.random() * 6}s;animation-delay:${-Math.random() * 8}s;transform:scale(${0.7 + Math.random() * 0.7})"></div>`).join("");
+      const em = Array.from({ length: 12 }, (_, i) => `<span style="left:${(Math.random() * 95) | 0}%;animation-duration:${5 + Math.random() * 6}s;animation-delay:${-Math.random() * 9}s">${["✨", "🎉", "🎈", "💖", "🎂"][i % 5]}</span>`).join("");
+      return `<div class="slide hero"><div class="balloons">${bl}</div><div class="emoji-rain">${em}</div>
+        <div class="kin"><div class="ln">${letters("HAPPY", 0.1)}</div><div class="ln">${letters("BIRTHDAY", 0.45)}</div><div class="ln nm">${letters(state.name.toUpperCase() + "!", 1.1)}</div></div>
+        <p class="sub">${esc(CONFIG.heroSub)}</p></div>`;
+    },
+    enter: () => { burst(); const t = setInterval(sides, 1300); return () => clearInterval(t); },
+  },
+  /* 2 CANDLE */
+  {
+    dur: 0,
+    html: () => `<div class="slide candle"><h3>${esc(CONFIG.candleTitle)}</h3>
+      <div class="cakewrap ix" id="cake">
+        <svg viewBox="0 0 240 230">
+          <ellipse cx="120" cy="212" rx="112" ry="14" fill="#fff" opacity=".9"/>
+          <rect x="30" y="140" width="180" height="70" rx="14" fill="#ff4ecd"/>
+          <path d="M30 156q15 16 30 0t30 0 30 0 30 0 30 0 30 0v-10a14 14 0 0 0-14-14H44a14 14 0 0 0-14 14z" fill="#fff"/>
+          <rect x="55" y="92" width="130" height="52" rx="12" fill="#a78bfa"/>
+          <path d="M55 108q16 16 32 0t32 0 32 0 32 0v-8a12 12 0 0 0-12-12H67a12 12 0 0 0-12 12z" fill="#fff"/>
+          ${[88, 120, 152].map((x, i) => `<g><rect x="${x - 5}" y="52" width="10" height="42" rx="3" fill="${["#ffd166", "#c6ff3d", "#4cc9f0"][i]}"/>
+            <g class="flame" style="animation-delay:${i * 0.08}s"><ellipse cx="${x}" cy="40" rx="8" ry="14" fill="#ff9f1c"/><ellipse cx="${x}" cy="43" rx="4" ry="8" fill="#fff3b0"/></g>
+            <path class="smoke" d="M${x} 46q-6-10 0-18t0-16" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/></g>`).join("")}
+        </svg></div>
+      <div class="meter"><b id="blowFill"></b></div>
+      <div class="hint" id="blowHint">Cake e hold kore rakho, phoonk dao 💨</div></div>`,
+    enter: (el, api) => {
+      const cake = $("#cake", el), fill = $("#blowFill", el), hint = $("#blowHint", el), NEED = 1500;
+      let raf = 0, t0 = 0, blown = false, to = 0;
+      const loop = (now) => { const p = clamp((now - t0) / NEED, 0, 1); fill.style.transform = `scaleX(${p})`; if (p >= 1) return done(); vibrate(5); raf = requestAnimationFrame(loop); };
+      const done = () => {
+        blown = true; el.firstElementChild.classList.add("blown"); vibrate([40, 40, 100]); burst(); sides();
+        hint.textContent = `Wish koro, ${state.name} 🤫✨`;
+        to = setTimeout(() => { if (api.cur() === el) api.next(); }, 3200);
+      };
+      cake.addEventListener("pointerdown", () => { if (blown) return; t0 = performance.now(); hint.textContent = "Phuuuuu... 💨"; raf = requestAnimationFrame(loop); });
+      const stop = () => { if (blown) return; cancelAnimationFrame(raf); fill.style.transform = "scaleX(0)"; hint.textContent = "Aro jore! Hold kore rakho 💨"; };
+      ["pointerup", "pointercancel", "pointerleave"].forEach((e) => cake.addEventListener(e, stop));
+      return () => { cancelAnimationFrame(raf); clearTimeout(to); };
+    },
+  },
+  /* 3 TINDER SWIPE */
+  {
+    dur: 0,
+    html: () => `<div class="slide swipe"><div class="sec-h">${esc(CONFIG.swipeTitle)}</div>
+      <div class="stack ix" id="stack">${[...CONFIG.photos].reverse().map((p) => `<div class="card">${imgTag(p)}<div class="stamp">LIKE ❤️</div><div class="cap">${esc(p.cap)}</div></div>`).join("")}</div>
+      <p style="opacity:.7;font-size:14px">Right swipe koro 👉 (left swipe disabled 😌)</p>
+      <div class="toast" id="toast"></div>
+      <div class="match" id="match"><h2>It's a match! 💘</h2><p style="opacity:.85">Sob memory tomar sathe, tai best.</p></div></div>`,
+    enter: (el, api) => {
+      const stack = $("#stack", el), toast = $("#toast", el), match = $("#match", el);
+      let sx = 0, sy = 0, dx = 0, drag = false, top = null;
+      const layout = () => {
+        const cards = [...stack.children];
+        cards.forEach((c, i) => { const d = cards.length - 1 - i; c.style.opacity = d < 3 ? 1 : 0; c.style.transform = `translateY(${d * 12}px) scale(${1 - d * 0.045})`; });
+      };
+      layout();
+      stack.addEventListener("pointerdown", (e) => { top = stack.lastElementChild; if (!top) return; drag = true; sx = e.clientX; sy = e.clientY; dx = 0; top.style.transition = "none"; stack.setPointerCapture(e.pointerId); api.pause(true); });
+      stack.addEventListener("pointermove", (e) => {
+        if (!drag) return; dx = e.clientX - sx; const dy = e.clientY - sy;
+        top.style.transform = `translate(${dx}px,${dy * 0.35}px) rotate(${dx / 16}deg)`;
+        $(".stamp", top).style.opacity = clamp(dx / 90, 0, 1);
+      });
+      const up = () => {
+        if (!drag) return; drag = false; api.pause(false); top.style.transition = "";
+        if (dx > 90) {
+          top.style.transform = `translate(${innerWidth}px,-40px) rotate(25deg)`; top.style.opacity = 0; vibrate(25);
+          fire({ particleCount: 25, spread: 60, origin: { y: 0.65 }, scalar: 0.9 });
+          const gone = top; setTimeout(() => { gone.remove(); layout(); if (!stack.children.length) { match.classList.add("on"); burst(); stack.style.visibility = "hidden"; setTimeout(() => api.cur() === el && api.next(), 3200); } }, 260);
+          layout();
+        } else {
+          if (dx < -90) { toast.textContent = "Left swipe disabled 😌 sob ta ekdom perfect"; toast.classList.add("on"); vibrate([20, 30, 20]); setTimeout(() => toast.classList.remove("on"), 1700); }
+          $(".stamp", top).style.opacity = 0; layout();
+        }
+      };
+      stack.addEventListener("pointerup", up); stack.addEventListener("pointercancel", up);
+    },
+  },
+  /* 4 POLAROID SCRAPBOOK */
+  {
+    dur: 0,
+    html: () => `<div class="slide"><div class="sec-h" style="margin-bottom:10px">${esc(CONFIG.polTitle)}</div><div class="board" id="board"></div><p style="opacity:.7;font-size:14px;margin-top:6px">Drag koro, ghurao, sajao ✋</p></div>`,
+    enter: (el) => {
+      const board = $("#board", el), pos = [[2, 0], [48, 6], [4, 30], [46, 38], [24, 62]], photos = CONFIG.photos.slice(0, 5);
+      let z = 10;
+      photos.forEach((p, i) => {
+        const d = document.createElement("div"); d.className = "pol ix";
+        const rot = (Math.random() * 20 - 10).toFixed(1); let tx = 0, ty = 0, sx = 0, sy = 0, dr = false;
+        d.style.left = pos[i][0] + "%"; d.style.top = pos[i][1] + "%"; d.style.zIndex = i;
+        d.style.transform = `translate(0,-120vh) rotate(${rot}deg)`; d.style.transition = `transform .8s ${0.15 * i}s cubic-bezier(.2,1.3,.4,1)`;
+        d.innerHTML = `${imgTag(p)}<span>${esc(p.cap)}</span>`; board.appendChild(d);
+        requestAnimationFrame(() => requestAnimationFrame(() => { d.style.transform = `translate(0,0) rotate(${rot}deg)`; }));
+        setTimeout(() => { d.style.transition = "box-shadow .2s"; }, 1200 + i * 150);
+        d.addEventListener("pointerdown", (e) => { dr = true; sx = e.clientX - tx; sy = e.clientY - ty; d.style.zIndex = ++z; d.setPointerCapture(e.pointerId); d.style.transition = "none"; vibrate(6); });
+        d.addEventListener("pointermove", (e) => { if (!dr) return; tx = e.clientX - sx; ty = e.clientY - sy; d.style.transform = `translate(${tx}px,${ty}px) rotate(${rot}deg) scale(1.05)`; });
+        const end = () => { dr = false; d.style.transform = `translate(${tx}px,${ty}px) rotate(${rot}deg)`; };
+        d.addEventListener("pointerup", end); d.addEventListener("pointercancel", end);
+      });
+    },
+  },
+  /* 5 PARALLAX 3D REEL */
+  {
+    dur: 0,
+    html: () => `<div class="slide"><div class="sec-h">${esc(CONFIG.reelTitle)}</div>
+      <div class="reelwrap"><div class="reel ix" id="reel">${CONFIG.photos.map((p) => `<div class="rc">${imgTag(p)}<span>${esc(p.cap)}</span></div>`).join("")}</div></div>
+      <p style="opacity:.7;font-size:14px">Swipe koro 👈👉</p></div>`,
+    enter: (el) => {
+      const reel = $("#reel", el), cards = $$(".rc", reel);
+      const upd = () => {
+        const mid = reel.getBoundingClientRect().left + reel.clientWidth / 2;
+        cards.forEach((c) => {
+          const r = c.getBoundingClientRect(), off = (r.left + r.width / 2 - mid) / (r.width * 0.85), k = clamp(off, -1.4, 1.4);
+          c.style.transform = `rotateY(${-k * 34}deg) scale(${1 - Math.min(Math.abs(k), 1) * 0.14})`;
+          const im = $("img", c); if (im) im.style.transform = `translateX(${-k * 22}px)`;
+        });
+      };
+      reel.addEventListener("scroll", () => requestAnimationFrame(upd), { passive: true }); upd();
+    },
+  },
+  /* 6 WRAPPED */
+  {
+    dur: 10000,
+    html: () => {
+      const items = [...CONFIG.wrapped, { label: "Favourite (tomar verified answer)", text: state.secret || "—" }];
+      return `<div class="slide wrapped"><h3>${esc(CONFIG.wrappedTitle)}</h3>${items.map((s, i) =>
+        `<div class="stat" style="animation-delay:${0.25 + i * 0.5}s"><small>${esc(s.label)}</small><b ${s.count != null ? `data-count="${s.count}" data-suf="${esc(s.suffix || "")}"` : ""}>${s.count != null ? "0" + esc(s.suffix || "") : esc(s.text)}</b></div>`).join("")}</div>`;
+    },
+    enter: (el) => {
+      const timers = [];
+      $$("[data-count]", el).forEach((b, i) => {
+        const end = +b.dataset.count, suf = b.dataset.suf; let n = 0;
+        timers.push(setTimeout(() => { const t = setInterval(() => { n = Math.min(end, n + Math.ceil(end / 30)); b.textContent = n + suf; if (n >= end) clearInterval(t); }, 30); timers.push(t); }, 500 + i * 500));
+      });
+      $$(".stat", el).forEach((s, i) => timers.push(setTimeout(() => vibrate(10), 300 + i * 500)));
+      return () => timers.forEach((t) => { clearTimeout(t); clearInterval(t); });
+    },
+  },
+  /* 7 FINAL */
+  {
+    dur: 0,
+    html: () => `<div class="slide final"><div class="fcard"><h2>${esc(CONFIG.finalTitle)}</h2><p id="msgText"></p>
+      <div class="fbtns" id="fbtns"><button class="btn ix" id="shakeBtn">🎁 Shake your phone</button><button class="btn ghost ix" id="replayBtn">↺ Replay</button></div></div>
+      <div class="sign">— ${esc(CONFIG.fromName)} ❤️</div></div>`,
+    enter: (el) => {
+      const msg = CONFIG.finalMessage.replace(/\{name\}/g, state.name);
+      let armed = false, last = 0, handler = null;
+      const t = typewrite($("#msgText", el), msg, 38, () => { $("#fbtns", el).classList.add("on"); burst(); });
+      $("#replayBtn", el).onclick = () => api.go(0);
+      $("#shakeBtn", el).onclick = async function () {
+        if (armed) return bigBlast();
+        try { if (typeof DeviceMotionEvent !== "undefined" && DeviceMotionEvent.requestPermission) { const r = await DeviceMotionEvent.requestPermission(); if (r !== "granted") { this.textContent = "Tap koro 🎁 (sensor off)"; armed = true; return bigBlast(); } } } catch (e) {}
+        armed = true; this.textContent = "Ekhon shake koro 📳 (ba tap)";
+        let lx = 0, ly = 0, lz = 0;
+        handler = (e) => { const a = e.accelerationIncludingGravity; if (!a) return; const d = Math.abs(a.x - lx) + Math.abs(a.y - ly) + Math.abs(a.z - lz); lx = a.x; ly = a.y; lz = a.z; const n = Date.now(); if (d > 30 && n - last > 2500) { last = n; bigBlast(); } };
+        addEventListener("devicemotion", handler);
+      };
+      return () => { clearInterval(t); handler && removeEventListener("devicemotion", handler); };
+    },
+  },
+];
+
+/* ---------- story engine ---------- */
+let idx = -1, elapsed = 0, lastT = 0, paused = false, held = false, raf = 0, cur = null, cleanup = null, started = false;
+const api = { next: () => next(), go: (i) => go(i), pause: (v) => { paused = v; }, cur: () => cur };
+
+function startStories() {
+  $("#sName").textContent = CONFIG.fromName; $("#sAv").textContent = CONFIG.fromName[0];
+  $("#sbar").innerHTML = SLIDES.map(() => "<i><b></b></i>").join("");
+  show("stories"); if (!started) { started = true; bindZones(); } go(0);
+  cancelAnimationFrame(raf); lastT = performance.now(); raf = requestAnimationFrame(tick);
+}
+function go(i) {
+  if (i < 0) i = 0; if (i >= SLIDES.length) return;
+  if (cleanup) { try { cleanup(); } catch (e) {} cleanup = null; }
+  if (cur) cur.remove();
+  idx = i; elapsed = 0; paused = false;
+  const s = SLIDES[i], box = $("#slides"); box.insertAdjacentHTML("beforeend", s.html()); cur = box.lastElementChild;
+  $$("#sbar b").forEach((b, k) => { b.style.transform = `scaleX(${k < i ? 1 : 0})`; });
+  if (!s.dur) $$("#sbar b")[i].style.transform = "scaleX(1)";
+  $("#nextpill").classList.toggle("on", !s.dur && i < SLIDES.length - 1);
+  cleanup = s.enter ? s.enter(cur, api) || null : null;
+}
+function next() { if (idx < SLIDES.length - 1) go(idx + 1); }
+function prev() { go(idx - 1); }
+function tick(t) {
+  raf = requestAnimationFrame(tick); const dt = t - lastT; lastT = t;
+  const s = SLIDES[idx]; if (!s || !s.dur) return;
+  if (!paused) elapsed += dt;
+  const p = clamp(elapsed / s.dur, 0, 1); $$("#sbar b")[idx].style.transform = `scaleX(${p})`;
+  if (p >= 1) next();
+}
+function bindZones() {
+  const z = $("#zones"); let timer = 0;
+  z.addEventListener("pointerdown", () => { held = false; timer = setTimeout(() => { held = true; paused = true; document.body.classList.add("paused"); }, 220); });
+  z.addEventListener("pointerup", (e) => {
+    clearTimeout(timer); document.body.classList.remove("paused");
+    if (held) { held = false; paused = false; return; }
+    e.clientX < innerWidth * 0.3 ? prev() : next();
+  });
+  z.addEventListener("pointercancel", () => { clearTimeout(timer); held = false; paused = false; document.body.classList.remove("paused"); });
+  $("#nextpill").addEventListener("click", next);
+}
+document.addEventListener("visibilitychange", () => { lastT = performance.now(); });
+</script>
+</body>
+</html>
